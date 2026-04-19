@@ -31,7 +31,9 @@ interface Project {
   workflowImage?: string;
   hasCustomWorkflow?: boolean;
   description: string;
+  detailDescription?: string;
   tags: string[];
+  prompt?: string;
 }
 
 interface TimelineItem {
@@ -52,7 +54,9 @@ const PROJECTS: Project[] = [
     video: "https://drive.google.com/file/d/1JFU0rg1EL2dHRVG1xShQibrobZK-znXz/preview",
     workflowImage: "/vw.png",
     description: "该作品通过 AIGC 全链路技术重构了传统文化叙事。核心难点在于在大跨度的转场中保持视觉资产的效果一致性。通过 Dreamina 模型的深度应用并结合 IP-Adapter 技术，实现了从二维水墨意象到三维写实光影的平滑过渡。",
+    detailDescription: "内容介绍：中国留学生周航因毕设瓶颈和延毕压力倍感焦虑。他在唐招提寺礼拜鉴真像时深受感动，从大师历经六次东渡、双目失明仍不懈努力的精神中汲取灵感，创作出作品《第六次东渡》，最终化解危机，顺利毕业。",
     tags: ["Runway Gen-3", "Dreamina Pro", "Video Consistency", "IP-Adapter"],
+    prompt: "A traditional Chinese ink wash painting transitions into a high-detail 3D cinematic landscape, giant waves crashing like a dragon, ethereal spirit energy, hyper-realistic water physics, 8k resolution, Ukiyo-e influence."
   },
   {
     id: 2,
@@ -62,7 +66,9 @@ const PROJECTS: Project[] = [
     gallery: ["/page1.jpg", "/page2.jpg", "/page3.jpg"],
     workflowImage: "/mw.jpg",
     description: "探索 AI 漫画工业化出图的标准流程。利用 Dreamina 的智能画布功能精准控制人物体态与构图，辅以特定角色的一致性训练，解决了 AIGC 创作中‘角色脸崩’的痛点，实现了单人一天完成 3 页黑白漫画的高效产能。",
+    detailDescription: "内容介绍：刚来日本留学的女孩阳菜（Hina），面对周围的一切都感到陌生而孤独。一天，她想起曾读过的“20分钟公园理论”，便决定去附近的公园坐坐。就在那时，一位素不相识的日本女孩突然走上前，想给他拍一张照片。看着这张照片，阳菜第一次产生了一种归属感，并下定决心不再消极等待，而是要主动出击，去拥抱这座陌生的城市。",
     tags: ["Dreamina", "Character Consistency", "Workflow Design", "Manga Script"],
+    prompt: "Seinen manga style, highly detailed line art, screentones, young woman walking in a serene urban park, afternoon sunlight filtering through trees, cinematic perspective, emotional atmosphere."
   },
   {
     id: 3,
@@ -73,6 +79,7 @@ const PROJECTS: Project[] = [
     hasCustomWorkflow: true,
     description: "人机协作开发的典型案例。通过与 Claude 4.0 的深度沟通，利用代码驱动 WebGL 渲染，在 AIGC 生成的视觉母版基础上，注入了动态的时间轴系统。该项目展示了如何将 AI 从单一的绘图工具，转化为协同解决复杂前端交互的‘研发伙伴’。",
     tags: ["Claude Code Gen", "WebGL / Canvas", "Prompt Engineering", "Interactive Web"],
+    prompt: "Immersive digital art exhibition, data visualization flowing in 3D space, dark ambient lighting, glowing neon particles, interconnected nodes representing neural networks, futuristic tech-art aesthetic."
   },
 ];
 
@@ -169,6 +176,69 @@ const BasicCursor = () => {
     </>
   );
 };
+
+// --- Twinkling Stars Effect for Dark Sections ---
+const TwinklingStars = () => {
+  const stars = useMemo(() => [...Array(150)].map((_, i) => ({
+    id: i,
+    left: `${Math.random() * 100}%`,
+    top: `${Math.random() * 100}%`,
+    size: Math.random() * 4 + 2,
+    duration: 3 + Math.random() * 5,
+    delay: Math.random() * 10,
+    rotation: Math.random() * 360
+  })), []);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {stars.map((s) => (
+        <motion.div
+          key={s.id}
+          initial={{ opacity: 0.1, scale: 0.5, rotate: s.rotation }}
+          animate={{ 
+            opacity: [0.1, 0.7, 0.1],
+            scale: [0.5, 1.2, 0.5],
+            rotate: s.rotation + 45
+          }}
+          transition={{
+            duration: s.duration,
+            repeat: Infinity,
+            delay: s.delay,
+            ease: "easeInOut"
+          }}
+          className="absolute bg-white"
+          style={{ 
+            left: s.left, 
+            top: s.top, 
+            width: s.size, 
+            height: s.size,
+            clipPath: "polygon(50% 0%, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0% 50%, 39% 39%)",
+            boxShadow: "0 0 10px rgba(255, 255, 255, 0.8)"
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+// --- Reusable Scroll Button ---
+const ScrollButton = ({ targetId, isDark = false, label = "Scroll" }: { targetId: string, isDark?: boolean, label?: string }) => (
+  <motion.button 
+    initial={{ opacity: 0 }}
+    whileInView={{ opacity: 1 }}
+    viewport={{ once: true }}
+    onClick={() => {
+      document.getElementById(targetId)?.scrollIntoView({ behavior: 'smooth' });
+    }}
+    className="flex flex-col items-center gap-4 group absolute bottom-12 left-1/2 -translate-x-1/2 lg:left-auto lg:right-12 lg:translate-x-0 z-20"
+  >
+    <span className={`text-[10px] uppercase tracking-[0.5em] ${isDark ? 'text-white/40 group-hover:text-white' : 'text-black/40 group-hover:text-black'} transition-colors font-bold`}>{label}</span>
+    <div className="relative">
+      <div className={`w-[1px] h-12 ${isDark ? 'bg-white/10 group-hover:bg-white' : 'bg-black/10 group-hover:bg-black'} transition-colors`} />
+      <ArrowDown size={14} className={`absolute -bottom-1 left-1/2 -translate-x-1/2 ${isDark ? 'text-white/40 group-hover:text-white' : 'text-black/40 group-hover:text-black'} transition-colors animate-bounce`} />
+    </div>
+  </motion.button>
+);
 
 class Star {
   x: number; y: number; size: number; opacity: number;
@@ -312,6 +382,7 @@ export default function App() {
   const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [isDetailPage, setIsDetailPage] = useState(false);
   const [showWorkflow, setShowWorkflow] = useState(false);
+  const [showPrompt, setShowPrompt] = useState(false);
   const [currentGalleryIndex, setCurrentGalleryIndex] = useState(0);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
@@ -495,8 +566,16 @@ export default function App() {
                       <p className="text-white/60 text-sm mb-4">视频加载失败</p>
                       <p className="text-white/40 text-[10px] leading-relaxed">
                         可能是由于网络限制或链接失效。<br />
-                        请检查视频源是否可访问。
+                        如果视频无法加载，请点击下方链接下载观看。
                       </p>
+                      <a 
+                        href={selectedProject.video} 
+                        target="_blank" 
+                        rel="noreferrer" 
+                        className="mt-6 text-[10px] uppercase tracking-widest text-white/60 hover:text-white underline"
+                      >
+                        点击下载/原始地址
+                      </a>
                     </div>
                   </>
                 )}
@@ -547,27 +626,258 @@ export default function App() {
           <div>
             <span className="text-xs uppercase tracking-[0.5em] text-black/40 mb-6 block">{selectedProject.category}</span>
             <h1 className="font-serif text-6xl md:text-8xl mb-12 leading-tight">{selectedProject.title}</h1>
-            <p className="text-black/60 leading-relaxed mb-12 text-lg font-light">{selectedProject.description}</p>
+            <p className="text-black/60 leading-relaxed mb-12 text-lg font-light">{selectedProject.detailDescription || selectedProject.description}</p>
             <div className="flex flex-wrap gap-4 mb-12">
               {selectedProject.tags.map(tag => (
                 <span key={tag} className="px-4 py-2 bg-black/5 rounded-full text-[10px] uppercase tracking-widest">{tag}</span>
               ))}
             </div>
-            <button 
-              onClick={() => {
-                if (selectedProject.workflowImage || selectedProject.hasCustomWorkflow) {
-                  setShowWorkflow(true);
-                }
-              }}
-              className="px-12 py-5 bg-black text-white rounded-full text-xs uppercase tracking-[0.3em] hover:scale-105 transition-transform"
-            >
-              Click here to see the workflow
-            </button>
+            <div className="flex flex-col sm:flex-row gap-4 mb-24">
+              <button 
+                onClick={() => {
+                  if (selectedProject.workflowImage || selectedProject.hasCustomWorkflow) {
+                    setShowWorkflow(true);
+                  }
+                }}
+                className="px-8 py-5 bg-black text-white rounded-full text-[10px] uppercase tracking-[0.2em] hover:scale-105 transition-transform flex-1"
+              >
+                Click here to see the workflow
+              </button>
+              {selectedProject.id !== 3 && (
+                <button 
+                  onClick={() => setShowPrompt(true)}
+                  className="px-8 py-5 border border-black text-black rounded-full text-[10px] uppercase tracking-[0.2em] hover:bg-black hover:text-white transition-all flex-1"
+                >
+                  Click here to see the prompt
+                </button>
+              )}
+            </div>
           </div>
         </div>
+
+        <AnimatePresence>
+          {showPrompt && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-[110] bg-white/98 backdrop-blur-2xl flex items-center justify-center p-6 lg:p-12 overflow-y-auto"
+            >
+              <button 
+                onClick={() => setShowPrompt(false)}
+                className="fixed top-8 right-8 text-black hover:opacity-50 transition-opacity z-[120] p-4 bg-white/50 backdrop-blur rounded-full"
+              >
+                <X size={24} />
+              </button>
+
+              {selectedProject.id === 1 ? (
+                /* Special Layout for Project 1 - Horizontal Distribution */
+                <motion.div 
+                  initial={{ y: 30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-stretch"
+                >
+                  {/* Left Column: Visuals */}
+                  <div className="flex flex-col gap-6">
+                    <div className="rounded-3xl overflow-hidden shadow-2xl bg-black aspect-video relative">
+                      <video 
+                        src="/v1.mp4" 
+                        autoPlay 
+                        loop 
+                        muted 
+                        playsInline 
+                        className="w-full h-full object-contain"
+                      />
+                      <div className="absolute top-4 left-4 px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-[8px] uppercase tracking-widest text-white border border-white/20">AIGC Result Preview</div>
+                    </div>
+                    <div className="rounded-3xl overflow-hidden shadow-xl border border-black/5 bg-zinc-50 flex items-center justify-center aspect-video">
+                      <img 
+                        src="/prompt.png" 
+                        alt="Prompt visualization" 
+                        className="max-w-full max-h-full object-contain p-4"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement;
+                          target.src = "https://picsum.photos/seed/prompt/800/600";
+                        }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Right Column: Stationery Style Content */}
+                  <div className="relative p-8 lg:p-12 bg-[#fdfaf2] rounded-3xl shadow-lg border border-[#e8dcc8] flex flex-col items-start overflow-hidden text-left">
+                    {/* Stationery Lines Decorative Background */}
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px)', backgroundSize: '100% 2.8rem' }} />
+                    
+                    <div className="relative z-10 w-full h-full flex flex-col">
+                      <div className="flex items-center gap-4 mb-8 w-full pb-4 border-b border-[#e8dcc8]">
+                        <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center">
+                          <Palette size={18} className="text-[#8b7355]" />
+                        </div>
+                        <span className="text-[10px] uppercase tracking-[0.5em] text-[#8b7355] font-bold">Creative Manuscript</span>
+                      </div>
+
+                      <div className="space-y-8 text-[#4a4036]">
+                        <div className="space-y-4">
+                          <h4 className="flex items-center gap-3 font-serif text-xl font-bold">
+                            <span className="text-2xl">🎬</span> 整体风格与镜头语言
+                          </h4>
+                          <div className="bg-white/40 p-5 rounded-2xl border border-white/60 italic font-serif leading-relaxed text-sm lg:text-base">
+                            Camera & Tone: <br />
+                            &lt;整体叙事风格&gt; &lt;镜头控制角度&gt; &lt;主体人物+动作&gt; &lt;画幅规定&gt;
+                          </div>
+                        </div>
+
+                        <div className="space-y-6">
+                          <h4 className="flex items-center gap-3 font-serif text-xl font-bold">
+                            <span className="text-2xl">💡</span> 技术难点与解决思路
+                          </h4>
+                          
+                          <div className="grid gap-5">
+                            {[
+                              { 
+                                num: "①", 
+                                title: "跨时空叙事的视觉锚点 (Match Cut)", 
+                                content: "为了将“鉴真东渡的历史孤寂感”与“现代学术研究的受挫感”进行时空链接，我设计了从“真实海浪水珠”到“二维波浪图纸”的 Match Cut 转场。" 
+                              },
+                              { 
+                                num: "②", 
+                                title: "攻克 AI 形变不可控性", 
+                                content: "AI 视频生成中最难的是控制物体的平滑形变。我没有依赖单纯的文本抽卡，而是启用了 Dreamina 的 首尾帧生成模式 (First and Last frames)，并在 Prompt 中极其精确地定义了物理特征的过渡（“变扁、变直、变干”）和色彩的褪变（“半透明海蓝到纯白”），强行引导模型完成从 3D 液体到 2D 固体的几何演变。" 
+                              },
+                              { 
+                                num: "③", 
+                                title: "情绪色彩的冷暖过渡", 
+                                content: "在视觉要求中严格规定了从“狂暴深蓝色调”到“办公室明亮冷调”的色彩映射，确保转场在情绪传达上的连贯性。" 
+                              }
+                            ].map((item, idx) => (
+                              <div key={idx} className="relative pl-8 text-left">
+                                <span className="absolute left-0 top-0.5 text-[#8b7355] font-bold text-lg">{item.num}</span>
+                                <h5 className="font-bold mb-1 text-sm lg:text-base">{item.title}</h5>
+                                <p className="text-xs lg:text-sm text-[#6b5e50] leading-relaxed font-light">
+                                  {item.content}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-8 pt-6 flex justify-end w-full border-t border-[#e8dcc8]/30">
+                        <div className="text-right">
+                          <div className="w-16 h-px bg-[#8b7355]/20 mb-2 ml-auto" />
+                          <span className="text-[9px] uppercase tracking-[0.3em] text-[#8b7355]/60">Technological Aesthetics / AIGC 2026</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : selectedProject.id === 2 ? (
+                /* Special Layout for Project 2 - Horizontal Distribution */
+                <motion.div 
+                  initial={{ y: 30, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className="max-w-7xl w-full grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20 items-stretch"
+                >
+                  {/* Left Column: Image */}
+                  <div className="rounded-3xl overflow-hidden shadow-2xl bg-zinc-100 flex items-center justify-center">
+                    <img 
+                      src="/eye.png" 
+                      alt="Eye close-up" 
+                      className="w-full h-full object-contain"
+                      referrerPolicy="no-referrer"
+                      onError={(e) => {
+                        const target = e.target as HTMLImageElement;
+                        target.src = "https://picsum.photos/seed/eye/800/800";
+                      }}
+                    />
+                  </div>
+
+                  {/* Right Column: Stationery Style Content */}
+                  <div className="relative p-8 lg:p-12 bg-[#fdfaf2] rounded-3xl shadow-lg border border-[#e8dcc8] flex flex-col items-start overflow-hidden text-left">
+                    {/* Stationery Lines Decorative Background */}
+                    <div className="absolute inset-0 opacity-[0.03] pointer-events-none" style={{ backgroundImage: 'linear-gradient(#000 1px, transparent 1px)', backgroundSize: '100% 2.8rem' }} />
+                    
+                    <div className="relative z-10 w-full h-full flex flex-col">
+                      <div className="flex items-center gap-4 mb-8 w-full pb-4 border-b border-[#e8dcc8]">
+                        <div className="w-10 h-10 rounded-full bg-black/5 flex items-center justify-center">
+                          <Palette size={18} className="text-[#8b7355]" />
+                        </div>
+                        <span className="text-[10px] uppercase tracking-[0.5em] text-[#8b7355] font-bold">Manga Script Analysis</span>
+                      </div>
+
+                      <div className="space-y-8 text-[#4a4036]">
+                        <div className="space-y-4">
+                          <h4 className="flex items-center gap-3 font-serif text-xl font-bold">
+                            <span className="text-2xl">📝</span> CORE SCRIPT PROMPT
+                          </h4>
+                          <div className="grid gap-4">
+                            {[
+                              { title: "① Style & Composition", content: "黑白漫画风格，特写画面仅保留女孩的眼睛。" },
+                              { title: "② Narrative Trigger", content: "眼神瞬间亮了起来，瞳孔中映射出那张鲜花照片。" },
+                              { title: "③ Cultural Modifier (关键修饰)", content: "启用少女漫画标志性视觉手法：眼睛超大比例畸变，内部闪烁无数星星符号（夸张大眼与高光），以极端的视觉化手法体现人物被美好事物瞬间唤醒的心流状态。" }
+                            ].map((item, idx) => (
+                              <div key={idx} className="bg-white/40 p-4 rounded-xl border border-white/60">
+                                <h5 className="font-bold text-xs uppercase tracking-wider mb-1 text-[#8b7355]">{item.title}</h5>
+                                <p className="text-sm font-light leading-relaxed">{item.content}</p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="space-y-4">
+                          <h4 className="flex items-center gap-3 font-serif text-xl font-bold">
+                            <span className="text-2xl">💡</span> DESIGNER'S INSIGHT
+                          </h4>
+                          <p className="text-[13px] lg:text-sm text-[#6b5e50] leading-relaxed font-light text-justify bg-white/30 p-6 rounded-2xl border border-white/40 italic">
+                            优秀的 AIGC 视觉创作绝非简单的物理特征堆堆砌，而是设计师文化积淀的精准投射。在生成特定艺术风格时，仅靠直白的文本描述往往难以触及灵魂。例如在此次漫画风格的生成中，我没有停留在“画一双眼睛”的表层，而是提取了“少女漫 (Shōjo Manga)”这一品类独有的视觉修辞——通过刻意强化“夸张的大眼 (Dekame)”与满溢的“瞳孔高光 (Sparkling Eyes)”，将角色的情绪唤醒具象化。只有深谙并驾驭这些潜藏的媒介特征，才能写出直击 AI 核心的 Prompt，赋予数字生成物地道的文化质感。
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-8 pt-6 flex justify-end w-full border-t border-[#e8dcc8]/30">
+                        <div className="text-right">
+                          <div className="w-16 h-px bg-[#8b7355]/20 mb-2 ml-auto" />
+                          <span className="text-[9px] uppercase tracking-[0.3em] text-[#8b7355]/60">Visual culture research / AIGC 2026</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              ) : (
+                /* Default Layout for other projects */
+                <motion.div 
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  className="max-w-2xl w-full text-center"
+                >
+                  <span className="text-xs uppercase tracking-[0.6em] text-black/40 mb-8 block">Ai Generation Prompt</span>
+                  <div className="bg-black/5 p-12 rounded-3xl relative">
+                    <p className="font-serif text-2xl lg:text-3xl leading-relaxed text-black italic">
+                      "{selectedProject.prompt || "No prompt available for this project."}"
+                    </p>
+                    <div className="absolute -top-4 -left-4 text-6xl text-black/5 font-serif">“</div>
+                    <div className="absolute -bottom-12 -right-4 text-6xl text-black/5 font-serif">”</div>
+                  </div>
+                  <button 
+                    onClick={() => {
+                      if (selectedProject.prompt) {
+                        navigator.clipboard.writeText(selectedProject.prompt);
+                      }
+                    }}
+                    className="mt-12 text-[10px] uppercase tracking-[0.4em] font-bold text-black border-b border-black pb-1 hover:opacity-50 transition-opacity"
+                  >
+                    Copy to clipboard
+                  </button>
+                </motion.div>
+              )}
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.div>
     );
   }
+
 
   return (
     <div className="relative min-h-screen bg-white text-black selection:bg-black selection:text-white font-sans overflow-x-hidden">
@@ -591,46 +901,129 @@ export default function App() {
       <section id="home" className="relative h-screen flex items-center justify-center px-6 lg:px-24 overflow-hidden bg-white">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center w-full max-w-7xl">
           <div className="relative z-10 text-center lg:text-left">
-            <div className="overflow-hidden">
-              <motion.h1 
-                initial={{ opacity: 0, y: 80 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ 
-                  duration: 1.8, 
-                  delay: 2.2, 
-                  ease: [0.16, 1, 0.3, 1] 
-                }}
-                className="font-serif text-[18vw] lg:text-[10vw] leading-[0.8] tracking-tighter mb-8 lg:mb-12"
-              >
-                POR<br />TFO<br />LIO
-              </motion.h1>
+            <div className="flex items-center justify-center lg:justify-start">
+              <div className="overflow-hidden">
+                <motion.h1 
+                  initial={{ opacity: 0, y: 80 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ 
+                    duration: 1.8, 
+                    delay: 2.2, 
+                    ease: [0.16, 1, 0.3, 1] 
+                  }}
+                  className="font-serif text-[18vw] lg:text-[10vw] leading-[0.8] tracking-tighter mb-8 lg:mb-12"
+                >
+                  POR<br />TFO<br />LIO
+                </motion.h1>
+              </div>
+
+              {/* NEW: Connecting Elements in the Gutter - Physically in the center of the gap */}
+              <div className="hidden lg:block ml-24 lg:ml-48 mt-6">
+                <div className="flex flex-col items-center gap-12">
+                  <motion.div 
+                    initial={{ height: 0 }}
+                    animate={{ height: 150 }}
+                    transition={{ delay: 3, duration: 1.5 }}
+                    className="w-[1.5px] bg-gradient-to-b from-transparent via-black/20 to-transparent"
+                  />
+                  <motion.span 
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 3.5 }}
+                    className="writing-mode-vertical-rl rotate-180 text-[11px] tracking-[1em] font-medium text-black/30 whitespace-nowrap"
+                  >
+                    DIGITAL GENESIS
+                  </motion.span>
+                  <motion.div 
+                    initial={{ height: 0 }}
+                    animate={{ height: 150 }}
+                    transition={{ delay: 3, duration: 1.5 }}
+                    className="w-[1.5px] bg-gradient-to-b from-transparent via-black/20 to-transparent"
+                  />
+                </div>
+              </div>
             </div>
-            <div className="flex justify-center lg:justify-start gap-8 items-center text-[10px] uppercase tracking-[0.5em] text-black/40">
-              <span>Liu Haonan</span>
-              <div className="w-12 h-px bg-black/20" />
-              <span>AIGC 2026</span>
+            
+            <div className="flex flex-col lg:flex-row justify-center lg:justify-start gap-8 items-center text-[10px] uppercase tracking-[0.5em] text-black/40">
+              <div className="flex items-center gap-8">
+                <span>Liu Haonan</span>
+                <div className="w-12 h-px bg-black/20" />
+                <span>AIGC 2026</span>
+              </div>
+            </div>
+
+            {/* Wandering Particles */}
+            <div className="hidden lg:block absolute top-1/2 -right-12 transform -translate-y-1/2">
+              {[...Array(3)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{
+                    x: [0, 40, 0],
+                    y: [0, -60, 0],
+                    opacity: [0, 0.5, 0]
+                  }}
+                  transition={{
+                    duration: 5 + i,
+                    repeat: Infinity,
+                    delay: i * 2,
+                    ease: "easeInOut"
+                  }}
+                  className="absolute top-1/2 left-0 w-1 h-1 bg-black/10 rounded-full blur-[1px]"
+                />
+              ))}
             </div>
           </div>
           
-          <div className="flex items-end justify-center lg:justify-start gap-2 lg:gap-4 h-[45vh] lg:h-[80vh] w-full max-w-5xl">
+          <div className="flex items-end justify-center lg:justify-start gap-2 lg:gap-4 h-[45vh] lg:h-[80vh] w-full max-w-5xl overflow-visible">
             {[
-              { src: "/imput_file_0.png", seed: "girl-coffee", alt: "Girl with coffee" },
-              { src: "/imput_file-1.png", seed: "reading", alt: "Person reading" },
-              { src: "/imput_file_2.jpg", seed: "walking", alt: "Person walking" },
-              { src: "/imput_file_3.jpg", seed: "running", alt: "Person running" }
+              { src: "/imput_file_0.png", seed: "girl-coffee", alt: "Girl with coffee", char: "A" },
+              { src: "/imput_file-1.png", seed: "reading", alt: "Person reading", char: "I" },
+              { src: "/imput_file_2.jpg", seed: "walking", alt: "Person walking", char: "G" },
+              { src: "/imput_file_3.jpg", seed: "running", alt: "Person running", char: "C" }
             ].map((item, i) => (
               <motion.div
                 key={i}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: -800 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1, delay: 2.5 + i * 0.2 }}
+                transition={{ 
+                  type: "spring",
+                  stiffness: 40,
+                  damping: 10,
+                  mass: 1,
+                  delay: 0.5 + i * 0.2
+                }}
                 className={`relative group cursor-pointer flex-1 ${i === 3 ? "min-w-[120px] lg:min-w-[250px]" : "min-w-[60px] lg:min-w-[100px]"} ${i === 2 ? "-mr-4 lg:-mr-16 z-10" : ""}`}
-                style={{ height: `${55 + i * 15}%` }} // 55%, 70%, 85%, 100%
+                style={{ height: `${55 + i * 15}%` }}
               >
-                <img 
+                {/* Artistic Letter */}
+                <motion.div 
+                  initial={{ opacity: 0, scale: 0 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 1.5 + i * 0.2, type: "spring" }}
+                  className={`absolute ${
+                    i === 0 ? "-top-14 lg:-top-20" : 
+                    i === 1 ? "-top-10 lg:-top-14" : 
+                    i === 2 ? "-top-6 lg:-top-10" : 
+                    "-top-2 lg:-top-4"
+                  } left-1/2 -translate-x-1/2 pointer-events-none`}
+                >
+                  <span className="font-serif italic text-6xl lg:text-9xl text-black/5 select-none transition-colors group-hover:text-black/20">
+                    {item.char}
+                  </span>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="font-serif text-2xl lg:text-4xl text-black group-hover:scale-125 transition-transform duration-500">
+                      {item.char}
+                    </span>
+                  </div>
+                </motion.div>
+
+                <motion.img 
+                  initial={{ filter: "grayscale(100%)" }}
+                  animate={{ filter: "grayscale(0%)" }}
+                  transition={{ duration: 1, delay: 2.5 + i * 0.2 }}
                   src={item.src} 
                   alt={item.alt}
-                  className={`absolute inset-0 w-full h-full object-contain transition-all duration-1000 ${isExplored ? "grayscale-0" : "grayscale"} group-hover:grayscale-0 group-hover:scale-105`}
+                  className="absolute inset-0 w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
                   referrerPolicy="no-referrer"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
@@ -645,30 +1038,16 @@ export default function App() {
         </div>
 
         {/* 90-degree Guide Bar */}
-        <motion.div 
-          animate={{ opacity: [0.3, 1, 0.3] }}
-          transition={{ duration: 3, repeat: Infinity }}
-          className="absolute bottom-12 right-12 flex flex-col items-end gap-4"
-        >
-          <button 
-            onClick={() => setIsExplored(!isExplored)}
-            className="flex items-center gap-4 group"
-          >
-            <span className={`text-[10px] uppercase tracking-[0.5em] transition-colors ${isExplored ? "text-black font-bold" : "text-black/40"}`}>
-              {isExplored ? "Explored" : "Explore"}
-            </span>
-            <div className={`w-12 h-12 border-r border-b transition-all duration-500 ${isExplored ? "border-black scale-110" : "border-black/20"}`} />
-          </button>
-        </motion.div>
+        <ScrollButton targetId="about" />
       </section>
 
       {/* Section 2: Personal */}
-      <section id="about" className="py-20 lg:py-32 px-6 lg:px-24 max-w-7xl mx-auto">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-32">
+      <section id="about" className="relative py-20 lg:py-32 px-6 lg:px-24">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-20 lg:gap-32">
           {/* Left: Profile */}
-          <div className="lg:sticky lg:top-32 h-fit">
-            <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-              <div className="w-64 h-64 mb-12 relative">
+          <div className="h-full flex flex-col">
+            <div className="lg:sticky lg:top-32 flex flex-col items-center lg:items-start text-center lg:text-left">
+              <div className="w-64 h-64 mb-12 relative flex-shrink-0">
                 <div className="blob-avatar w-full h-full bg-black/5 relative z-10">
                   <img src="/imput4.jpg" className="w-full h-full object-cover opacity-90" referrerPolicy="no-referrer" />
                 </div>
@@ -703,7 +1082,22 @@ export default function App() {
                   </motion.div>
                 ))}
               </div>
-            </div>
+
+              </div>
+
+            <motion.div 
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              className="mt-auto pt-20 lg:pt-0 w-[80%] max-w-[320px] self-center lg:self-start mix-blend-multiply"
+            >
+              <img 
+                src="/p2.jpg" 
+                alt="Detail sketch" 
+                className="w-full h-auto" 
+                referrerPolicy="no-referrer" 
+              />
+            </motion.div>
           </div>
 
           {/* Right: Timeline */}
@@ -787,11 +1181,15 @@ export default function App() {
             </div>
           </div>
         </div>
+
+        <ScrollButton targetId="works" />
       </section>
 
       {/* Section 3: Works (Curated Gallery) */}
       <section id="works" className="relative bg-black text-white py-20 lg:py-32 overflow-hidden">
-        <div className="px-6 lg:px-24 mb-16 lg:mb-24">
+        <TwinklingStars />
+        
+        <div className="relative z-10 px-6 lg:px-24 mb-16 lg:mb-24">
           <motion.span 
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
@@ -799,10 +1197,22 @@ export default function App() {
           >
             Selected Works
           </motion.span>
-          <h2 className="font-serif text-7xl md:text-9xl tracking-tighter">Portfolio.</h2>
+          <div className="relative inline-block group">
+            <h2 className="font-serif text-7xl md:text-9xl tracking-tighter">Portfolio.</h2>
+            {/* Tooltip Signboard */}
+            <motion.div 
+              initial={{ opacity: 0, x: -20 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              className="hidden lg:flex items-center gap-3 absolute -top-12 -right-32 bg-white text-black px-4 py-2 rounded-xl shadow-2xl border-l-4 border-black group-hover:scale-105 transition-transform"
+            >
+              <div className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+              <span className="text-[10px] font-bold tracking-widest whitespace-nowrap">点击图片进行详细观看</span>
+              <div className="absolute -bottom-2 left-4 w-4 h-4 bg-white rotate-45 -z-10" />
+            </motion.div>
+          </div>
         </div>
 
-        <div className="flex flex-col gap-20 lg:gap-32 px-6 lg:px-24 max-w-7xl mx-auto">
+        <div className="flex flex-col gap-20 lg:gap-32 px-6 lg:px-24 max-w-7xl mx-auto relative z-10">
           {PROJECTS.map((project, i) => (
             <motion.div
               key={project.id}
@@ -854,6 +1264,8 @@ export default function App() {
 
         {/* Decorative Background Element */}
         <div className="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-b from-white/[0.02] to-transparent pointer-events-none" />
+        
+        <ScrollButton targetId="contact" isDark />
       </section>
 
       {/* Section 4: Contact */}
@@ -962,7 +1374,7 @@ export default function App() {
                 </button>
                 <span className="text-[10px] uppercase tracking-[0.5em] text-black/40 mb-4 block">{selectedProject.category}</span>
                 <h3 className="font-serif text-4xl lg:text-6xl mb-8">{selectedProject.title}</h3>
-                <p className="text-black/60 leading-relaxed mb-12 font-light">{selectedProject.description}</p>
+                <p className="text-black/60 leading-relaxed mb-12 font-light">{selectedProject.detailDescription || selectedProject.description}</p>
                 <button 
                   onClick={() => setIsDetailPage(true)}
                   className="group flex items-center gap-4 text-xs uppercase tracking-[0.3em] font-medium"

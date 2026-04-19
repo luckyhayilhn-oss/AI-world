@@ -122,6 +122,10 @@ a, button, [role="button"], .cursor-pointer {
   perspective: 1000px;
 }
 
+.writing-mode-vertical-rl {
+  writing-mode: vertical-rl;
+}
+
 /* Typewriter Cursor */
 .typewriter-cursor::after {
   content: '|';
