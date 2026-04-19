@@ -436,6 +436,13 @@ export default function App() {
           onClick={() => {
             setIsDetailPage(false);
             setCurrentGalleryIndex(0);
+            // After closing detail page, ensure we return to the works section
+            setTimeout(() => {
+              const worksSection = document.getElementById('works');
+              if (worksSection) {
+                worksSection.scrollIntoView({ behavior: 'auto' });
+              }
+            }, 50);
           }} 
           className="fixed top-12 left-12 z-50 flex items-center gap-2 text-xs uppercase tracking-widest hover:opacity-50 transition-opacity"
         >
