@@ -547,13 +547,13 @@ export default function App() {
           <motion.div layoutId={`img-${selectedProject.id}`} className="aspect-[4/5] rounded-3xl overflow-hidden shadow-2xl bg-black relative group">
             {selectedProject.video ? (
               <div className="w-full h-full">
-                {selectedProject.video.includes('drive.google.com') ? (
+                 {selectedProject.video.includes('drive.google.com') || selectedProject.video.includes('feishu.cn') ? (
                   <iframe
                     src={selectedProject.video}
                     className="w-full h-full border-0"
-                    allow="autoplay; fullscreen"
+                    allow="autoplay; fullscreen; clipboard-write; encrypted-media; picture-in-picture"
                     allowFullScreen
-                  />
+                   />
                 ) : (
                   <>
                     <video 
